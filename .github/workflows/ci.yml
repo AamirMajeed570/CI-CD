@@ -1,0 +1,51 @@
+name: MERN CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo
+        ports: [ '27017:27017' ]
+        options: --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    env:
+      MONGO_URI: ${{ secrets.MONGO_URI }}  # Set MongoDB URI from GitHub secrets
+      PORT: 3000  # Define a default port if needed
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: 📦 Install Backend Dependencies
+        run: |
+          cd backend
+          npm install
+
+      - name: 📦 Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: 🧪 Test or Lint (optional)
+        run: |
+          # If you have tests, run them here
+          # Example: npm run test
+          echo "Run your tests or lint here (if applicable)"
+
+      - name: ⚒️ Build Frontend
+        run: |
+          cd frontend
+          npm run build
